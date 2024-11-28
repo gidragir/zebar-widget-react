@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, FC } from "react"
 import { createProviderGroup, NetworkOutput, BatteryOutput, WeatherOutput } from "zebar"
 import { BindingModeConfig } from "glazewm"
+
+import { CommonProps } from './types'
 
 import { Cpu, Languages, Microchip } from "lucide-react"
 
@@ -16,9 +18,7 @@ const providers = createProviderGroup({
     weather: { type: "weather" },
 })
 
-const Right = () => {
-    const icon_size: number = 15
-    
+const Right: FC<CommonProps> = ({ icon_size }) => {
     const [output, setOutput] = useState(providers.outputMap)
 
     useEffect(() => {
