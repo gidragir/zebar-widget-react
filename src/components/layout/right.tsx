@@ -1,10 +1,14 @@
-import { useState, useEffect, FC } from "react"
-import { createProviderGroup, NetworkOutput, BatteryOutput, WeatherOutput } from "zebar"
-import { BindingModeConfig } from "glazewm"
+import { useState, useEffect, FC, createElement } from "react"
+import { createProviderGroup, GlazeWmOutput, NetworkOutput, BatteryOutput, WeatherOutput } from "zebar"
 
 import { CommonProps } from './types'
 
-import { Cpu, Languages, Microchip } from "lucide-react"
+import {
+    Cpu, Languages, Microchip,
+    Sun, Moon, Cloud, CloudSunRain, CloudMoonRain, CloudRain, Snowflake, CloudLightning,
+    BatteryWarning, BatteryLow, BatteryMedium, BatteryFull, BatteryCharging,
+    WifiOff, WifiLow, WifiHigh, Wifi, EthernetPort
+} from "lucide-react"
 
 import "@/style/icons.css"
 
@@ -27,76 +31,95 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
 
     function getNetworkIcon(networkOutput: NetworkOutput) {
         const signalStrength = networkOutput.defaultGateway?.signalStrength ?? 0
+        let icon = WifiOff
 
         switch (networkOutput.defaultInterface?.type) {
             case "ethernet":
-                return <i className="nf nf-md-ethernet_cable"></i>;
+                icon = EthernetPort
+                break
             case "wifi":
                 if (signalStrength >= 80) {
-                    return <i className="nf nf-md-wifi_strength_4"></i>;
-                } else if (signalStrength >= 65) {
-                    return <i className="nf nf-md-wifi_strength_3"></i>;
+                    icon = Wifi
+                    break
                 } else if (signalStrength >= 40) {
-                    return <i className="nf nf-md-wifi_strength_2"></i>;
+                    icon = WifiHigh
+                    break
                 } else if (signalStrength >= 25) {
-                    return <i className="nf nf-md-wifi_strength_1"></i>;
+                    icon = WifiLow
+                    break
                 } else {
-                    return <i className="nf nf-md-wifi_strength_outline"></i>;
+                    icon = EthernetPort
+                    break
                 }
             default:
-                return <i className="nf nf-md-wifi_strength_off_outline"></i>;
+                icon = WifiOff
+                break
         }
+
+        return icon
     }
 
-    // Get icon to show for how much of the battery is charged.
     function getBatteryIcon(batteryOutput: BatteryOutput) {
         const chargePercent: number = batteryOutput.chargePercent
+        let icon = BatteryWarning
         if (chargePercent > 90)
-            return <i className="nf nf-fa-battery_4"></i>;
-        if (chargePercent > 70)
-            return <i className="nf nf-fa-battery_3"></i>;
+            icon = BatteryFull
         if (chargePercent > 40)
-            return <i className="nf nf-fa-battery_2"></i>;
+            icon = BatteryMedium
         if (chargePercent > 20)
-            return <i className="nf nf-fa-battery_1"></i>;
-        return <i className="nf nf-fa-battery_0"></i>;
+            icon = BatteryLow
+        return icon
     }
 
-    // Get icon to show for current weather status.
     function getWeatherIcon(weatherOutput: WeatherOutput) {
+        let icon = Sun
         switch (weatherOutput.status) {
             case "clear_day":
-                return <i className="nf nf-weather-day_sunny"></i>;
+                icon = Sun
+                break
             case "clear_night":
-                return <i className="nf nf-weather-night_clear"></i>;
+                icon = Moon
+                break
             case "cloudy_day":
-                return <i className="nf nf-weather-day_cloudy"></i>;
+                icon = Cloud
+                break
             case "cloudy_night":
-                return <i className="nf nf-weather-night_alt_cloudy"></i>;
+                icon = Cloud
+                break
             case "light_rain_day":
-                return <i className="nf nf-weather-day_sprinkle"></i>;
+                icon = CloudSunRain
+                break
             case "light_rain_night":
-                return <i className="nf nf-weather-night_alt_sprinkle"></i>;
+                icon = CloudMoonRain
+                break
             case "heavy_rain_day":
-                return <i className="nf nf-weather-day_rain"></i>;
+                icon = CloudRain
+                break
             case "heavy_rain_night":
-                return <i className="nf nf-weather-night_alt_rain"></i>;
+                icon = CloudRain
+                break
             case "snow_day":
-                return <i className="nf nf-weather-day_snow"></i>;
+                icon = Snowflake
+                break
             case "snow_night":
-                return <i className="nf nf-weather-night_alt_snow"></i>;
+                icon = Snowflake
+                break
             case "thunder_day":
-                return <i className="nf nf-weather-day_lightning"></i>;
+                icon = CloudLightning
+                break
             case "thunder_night":
-                return <i className="nf nf-weather-night_alt_lightning"></i>;
+                icon = CloudLightning
+                break
         }
+
+        return icon
     }
 
     return (
         <div className="right">
             {output.glazewm && (
                 <>
-                    {output.glazewm.bindingModes.map((bindingMode: BindingModeConfig) => (
+                    {output.glazewm.bindingModes.map((bindingMode: GlazeWmOutput["bindingModes"][number]) => (
                         <button className="binding-mode" key={bindingMode.name}>
                             {bindingMode.displayName ?? bindingMode.name}
                         </button>
@@ -116,8 +139,19 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
 
             {output.network && (
                 <div className="icon-value-container">
-                    {getNetworkIcon(output.network)}
+                    {createElement(getNetworkIcon(output.network), { className: "lucide-icon", size: icon_size })}
                     {output.network.defaultGateway?.ssid}
+                </div>
+            )}
+            
+            {output.cpu && (
+                <div className="icon-value-container">
+                    <Cpu className="lucide-icon" size={icon_size} />
+
+                    {/* Change the text color if the CPU usage is high. */}
+                    <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
+                        {Math.round(output.cpu.usage)}%
+                    </span>
                 </div>
             )}
 
@@ -135,31 +169,19 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
                 </div>
             )}
 
-            {output.cpu && (
-                <div className="icon-value-container">
-                    <Cpu className="lucide-icon" size={icon_size} />
-
-                    {/* Change the text color if the CPU usage is high. */}
-                    <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
-                        {Math.round(output.cpu.usage)}%
-                    </span>
-                </div>
-            )}
-
             {output.battery && (
                 <div className="icon-value-container">
-                    {/* Show icon for whether battery is charging. */}
                     {output.battery.isCharging && (
-                        <i className="nf nf-md-power_plug charging-icon"></i>
+                        <BatteryCharging className="lucide-icon" size={icon_size} />
                     )}
-                    {getBatteryIcon(output.battery)}
+                    {createElement(getBatteryIcon(output.battery), { className: "lucide-icon", size: icon_size })}
                     {Math.round(output.battery.chargePercent)}%
                 </div>
             )}
 
             {output.weather && (
                 <div className="icon-value-container">
-                    {getWeatherIcon(output.weather)}
+                    {createElement(getWeatherIcon(output.weather), { className: "lucide-icon", size: icon_size })}
                     {Math.round(output.weather.celsiusTemp)}°C
                 </div>
             )}

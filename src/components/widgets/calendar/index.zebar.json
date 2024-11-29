@@ -1,0 +1,27 @@
+{
+  "$schema": "https://github.com/glzr-io/zebar/raw/v2.4.0/resources/widget-schema.json",
+  "htmlPath": "./index.html",
+  "zOrder": "top_most",
+  "shownInTaskbar": false,
+  "focused": true,
+  "resizable": false,
+  "transparent": false,
+  "presets": [
+    {
+      "name": "calendar",
+      "anchor": "top_center",
+      "offsetX": "0px",
+      "offsetY": "45px",
+      "width": "30%",
+      "height": "200px",
+      "monitorSelection": {
+        "type": "all"
+      },
+      "dockToEdge": {
+        "enabled": false,
+        "edge": null,
+        "windowMargin": "0px"
+      }
+    }
+  ]
+}

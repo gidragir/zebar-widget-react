@@ -1,16 +1,11 @@
-import { useState, useEffect, FC } from "react"
-import { createProviderGroup } from "zebar"
-import { Workspace } from "glazewm"
-
-import { CommonProps } from './types'
-
-import { Grid2x2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { createProviderGroup, GlazeWmOutput } from "zebar"
 
 const providers = createProviderGroup({
     glazewm: { type: "glazewm" },
 })
 
-const Left: FC<CommonProps> = ({ icon_size }) => {
+const Left = () => {
     const [output, setOutput] = useState(providers.outputMap)
 
     useEffect(() => {
@@ -19,10 +14,9 @@ const Left: FC<CommonProps> = ({ icon_size }) => {
 
     return (
         <div className="left">
-            <Grid2x2 size={icon_size}/>
             {output.glazewm && (
                 <div className="workspaces">
-                    {output.glazewm.currentWorkspaces.map((workspace: Workspace) => (
+                    {output.glazewm.currentWorkspaces.map((workspace: GlazeWmOutput["currentWorkspaces"][number]) => (
                         <button
                             className={`workspace ${workspace.hasFocus && "focused"
                                 } ${workspace.isDisplayed && "displayed"}`}

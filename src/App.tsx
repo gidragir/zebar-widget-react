@@ -12,7 +12,7 @@ function App() {
   return (
     <div className="app">
       <Suspense fallback={<div>Loading...</div>}>
-        <Left {...commonProps}/>
+        <Left />
       </Suspense>
 
       <Suspense fallback={<div>Loading...</div>}>

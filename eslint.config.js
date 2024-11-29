@@ -25,5 +25,13 @@ export default tseslint.config(
       ],
       'semi': 'off',
     },
+    "overrides": [
+    {
+      "files": ["*.tsx"],
+      "rules": {
+        "no-unused-vars": ["error", { "args": "none", "vars": "all" }]
+      }
+    }
+  ]
   },
 )
