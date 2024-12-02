@@ -16,7 +16,7 @@ function App() {
       </Suspense>
 
       <Suspense fallback={<div>Loading...</div>}>
-        <Center />
+        <Center {...commonProps}/>
       </Suspense>
 
       <Suspense fallback={<div>Loading...</div>}>
