@@ -1,12 +1,10 @@
 .lucide-icon {
     margin-right: 5px;
-    color: aliceblue;
 }
 
 .icon-value-container {
     margin-right: 20px;
     display: flex;
     flex-direction: row;
-    align-items: center;  
-    color: white;  
+    align-items: flex-end;    
 }

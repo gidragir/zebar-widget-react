@@ -7,7 +7,8 @@ import {
     Cpu, Languages, Microchip,
     Sun, Moon, Cloud, CloudSunRain, CloudMoonRain, CloudRain, Snowflake, CloudLightning,
     BatteryWarning, BatteryLow, BatteryMedium, BatteryFull, BatteryCharging,
-    WifiOff, WifiLow, WifiHigh, Wifi, EthernetPort
+    WifiOff, WifiLow, WifiHigh, Wifi, EthernetPort,
+    LucideProps
 } from "lucide-react"
 
 import "@/style/icons.css"
@@ -38,19 +39,12 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
                 icon = EthernetPort
                 break
             case "wifi":
-                if (signalStrength >= 80) {
-                    icon = Wifi
-                    break
-                } else if (signalStrength >= 40) {
-                    icon = WifiHigh
-                    break
-                } else if (signalStrength >= 25) {
-                    icon = WifiLow
-                    break
-                } else {
-                    icon = EthernetPort
-                    break
-                }
+                icon = [
+                    { threshold: 80, icon: Wifi },
+                    { threshold: 40, icon: WifiHigh },
+                    { threshold: 25, icon: WifiLow },
+                ].find(({ threshold }) => signalStrength >= threshold)?.icon || WifiOff;
+                break
             default:
                 icon = WifiOff
                 break
@@ -60,57 +54,31 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
     }
 
     function getBatteryIcon(batteryOutput: BatteryOutput) {
-        const chargePercent: number = batteryOutput.chargePercent
-        let icon = BatteryWarning
-        if (chargePercent > 90)
-            icon = BatteryFull
-        if (chargePercent > 40)
-            icon = BatteryMedium
-        if (chargePercent > 20)
-            icon = BatteryLow
+        const chargePercent: number = batteryOutput.chargePercent;
+
+        const icon = [
+            { threshold: 90, icon: BatteryFull },
+            { threshold: 40, icon: BatteryMedium },
+            { threshold: 20, icon: BatteryLow },
+        ].find(({ threshold }) => chargePercent > threshold)?.icon || BatteryWarning;
         return icon
     }
 
     function getWeatherIcon(weatherOutput: WeatherOutput) {
-        let icon = Sun
-        switch (weatherOutput.status) {
-            case "clear_day":
-                icon = Sun
-                break
-            case "clear_night":
-                icon = Moon
-                break
-            case "cloudy_day":
-                icon = Cloud
-                break
-            case "cloudy_night":
-                icon = Cloud
-                break
-            case "light_rain_day":
-                icon = CloudSunRain
-                break
-            case "light_rain_night":
-                icon = CloudMoonRain
-                break
-            case "heavy_rain_day":
-                icon = CloudRain
-                break
-            case "heavy_rain_night":
-                icon = CloudRain
-                break
-            case "snow_day":
-                icon = Snowflake
-                break
-            case "snow_night":
-                icon = Snowflake
-                break
-            case "thunder_day":
-                icon = CloudLightning
-                break
-            case "thunder_night":
-                icon = CloudLightning
-                break
-        }
+        const icon = [
+            { condition: "clear_day", icon: Sun },
+            { condition: "clear_night", icon: Moon },
+            { condition: "cloudy_day", icon: Cloud },
+            { condition: "cloudy_night", icon: Cloud },
+            { condition: "light_rain_day", icon: CloudSunRain },
+            { condition: "light_rain_night", icon: CloudMoonRain },
+            { condition: "heavy_rain_day", icon: CloudRain },
+            { condition: "heavy_rain_night", icon: CloudRain },
+            { condition: "snow_day", icon: Snowflake },
+            { condition: "snow_night", icon: Snowflake },
+            { condition: "thunder_day", icon: CloudLightning },
+            { condition: "thunder_night", icon: CloudLightning },
+        ].find(({ condition }) => weatherOutput.status == condition)?.icon || Sun;
 
         return icon
     }
@@ -124,16 +92,6 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
                             {bindingMode.displayName ?? bindingMode.name}
                         </button>
                     ))}
-
-                    <button
-                        className={`tiling-direction nf ${output.glazewm.tilingDirection === "horizontal"
-                            ? "nf-md-swap_horizontal"
-                            : "nf-md-swap_vertical"
-                            }`}
-                        onClick={() =>
-                            output.glazewm?.runCommand("toggle-tiling-direction")
-                        }
-                    ></button>
                 </>
             )}
 
@@ -143,12 +101,11 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
                     {output.network.defaultGateway?.ssid}
                 </div>
             )}
-            
+
             {output.cpu && (
                 <div className="icon-value-container">
                     <Cpu className="lucide-icon" size={icon_size} />
 
-                    {/* Change the text color if the CPU usage is high. */}
                     <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
                         {Math.round(output.cpu.usage)}%
                     </span>
@@ -165,7 +122,7 @@ const Right: FC<CommonProps> = ({ icon_size }) => {
             {output.keyboard && (
                 <div className="icon-value-container">
                     <Languages className="lucide-icon" size={icon_size} />
-                    {output.keyboard.layout}
+                    {output.keyboard.layout.split("-")[1]}
                 </div>
             )}
 
